@@ -1,0 +1,34 @@
+---
+type: update
+
+globals: 
+  app: /home/jelastic/adminMongo/config/app.json
+  
+id: mongodb-replica-set-test
+name: MongoDB Replica Set Test
+homepage: http://www.mongodb.org/
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/mongodb/master
+logo: /images/mongodb-70x70.png
+description: Test of Replica Set status
+
+onInstall:
+  - cmd[${nodes.nosqldb.master.id}]: |-  
+      printf "m = rs.status().members
+      ok=true;
+      if (m.length != ${nodes.nosqldb.length}) {
+        printjson({result:'error', message:'Members length = ' + m.length + ', nodes length = ${nodes.nosqldb.length}.'})
+        ok=false;
+      }
+      if (ok) for (var i in m) {
+        if (!m[i].health) {
+          printjson({result:'error', message:'Member ' + m[i].name + ' is not healthy.'})
+          ok=false;
+          break;
+        }
+      }
+      if (ok) printjson({result:0})" > ~/mongodb-status-test.js    
+      mongo -u admin -p $(cat ${globals.app} | grep password | cut -d'"' -f4) --quiet ~/mongodb-status-test.js 
+  - script: return ${response.out}      
+    
+success:
+  text: MongoDB Replica Set is up and running. All members are healthy!
