@@ -84,3 +84,4 @@ actions:
     cmd[nosqldb]: |-
       echo -e "use local\n ids = [${nodes.nosqldb.join(id,)}]\n cfg = db.system.replset.findOne( { '_id':'${globals.rsn}' } )\n for (var i = 0; i < ids.length; i++) { cfg.members[i].host = 'node' + ids[i]+ ':27017' }\n db.system.replset.update( { '_id':'${globals.rsn}' } , cfg )" | mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)
       sudo jem service restart
+    sync: true
