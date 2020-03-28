@@ -1,0 +1,111 @@
+---
+type: install
+id: mongodb-replica-set
+name: MongoDB Replica Set
+category: apps/clustered-dbs
+homepage: http://www.mongodb.org/
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/mongodb/master
+logo: /images/mongodb-70x70.png
+description: |  
+  Three member replica sets provide enough redundancy to survive most network partitions and other system failures. 
+  These sets also have sufficient capacity for many distributed read operations. 
+  Replica sets should always have an odd number of members. 
+  This ensures that elections will proceed smoothly. For more about designing replica sets, see the [Replication overview](https://docs.mongodb.com/manual/replication/).
+
+globals: 
+  secrets: ${fn.password(20)}
+  key: /home/jelastic/mongodb.key
+  app: /home/jelastic/adminMongo/config/app.json
+  rsn: rs0
+
+nodes:
+  - extip: false
+    count: 3
+    cloudlets: 16
+    nodeType: mongodb
+    nodeGroup: nosqldb
+    scalingMode: STATELESS
+    env:
+      KEY_PASS: ${fn.random}
+
+onInstall:
+  - if (${settings.clone:false}): 
+    - reconfigure
+  - else: 
+    - configure: nosqldb
+    - init
+
+onAfterScaleOut[nosqldb]: 
+  - configure: ${event.response.nodes.join(id,)}
+  - add: ${event.response.nodes.join(id,)}
+onAfterScaleIn[nosqldb]: 
+  remove: ${event.response.nodes.join(id,)}
+
+onAfterClone:
+  - script: delete MANIFEST.id; MANIFEST.put("type", "update"); return {result:0, jps:MANIFEST};
+  - install: ${response.jps}
+    envName: ${event.response.env.envName}    
+    settings: 
+      nodeGroup: ${settings.nodeGroup}      
+      clone: true  
+          
+actions:
+  configure:
+    - cmd[${nodes.nosqldb.master.id}]: |-
+        [ ! -f ${globals.key} ] && {  
+          openssl rand -base64 756 > ${globals.key}
+          chmod 400 ${globals.key}
+        }
+        cat ${globals.key} | openssl enc -base64 -e -aes-256-cbc -salt -pass pass:$KEY_PASS      
+    - cmd[${this}]: |-
+        [ ! -f ${globals.key} ] && {          
+          echo -e "${response.out}" | openssl enc -base64 -d -aes-256-cbc -salt -pass pass:$KEY_PASS > ${globals.key} && echo OK
+          chmod 400 ${globals.key}
+          chown -R mongod:mongod ${globals.key}
+        }
+        sed -i "s@#replication:@replication:\\n replSetName: ${globals.rsn}@g" /etc/mongod.conf
+        sed -i "s@security:@security:\\n keyFile: ${globals.key}@g" /etc/mongod.conf
+        jem service restart
+      user: root  
+      
+  init: 
+    - sleep: 3000
+    - cmd[${nodes.nosqldb.master.id}]: |-
+        IFS=',' read -ra nodes <<< "${nodes.nosqldb.join(id,)}"; members=""; i=0
+        for n in "${nodes[@]}"; do [ $i -gt 0 ] && members="${members},"; members="${members}{ _id:${i}, host:\"node${n}:27017\" }"; let "i++"; done
+        echo "rs.initiate({_id:'${globals.rsn}', members:[${members}]})" | mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4) 
+
+  add:
+    cmd[nosqldb]: |-
+      nodeId=$(hostname -s | cut -d'-' -f1 | cut -d'e' -f2)
+      [[ "${this}" == *"${nodeId}"* ]] && {
+        echo "Skip 'add' execution on node$nodeId."
+      } || {
+        IFS=',' read -ra nodes <<< "${this}"; action=""; i=0
+        for n in "${nodes[@]}"; do [ $i -gt 0 ] && action="${action}; "; action="${action}rs.add({host:\"node${n}:27017\"})"; let "i++"; done
+        echo "if (db.isMaster().ismaster) { ${action} }" | mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)
+      }  
+      
+  remove:
+    cmd[nosqldb]: |-
+      IFS=',' read -ra nodes <<< "${this}"; action=""; i=0
+      for n in "${nodes[@]}"; do [ $i -gt 0 ] && action="${action}; "; action="${action}rs.remove(\"node${n}:27017\")"; let "i++"; done
+      echo "if (db.isMaster().ismaster) { ${action} }" | mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)
+      
+  reconfigure: 
+    cmd[nosqldb]: |-
+      echo -e "use local\n ids = [${nodes.nosqldb.join(id,)}]\n cfg = db.system.replset.findOne( { '_id':'${globals.rsn}' } )\n for (var i = 0; i < ids.length; i++) { cfg.members[i].host = 'node' + ids[i]+ ':27017' }\n db.system.replset.update( { '_id':'${globals.rsn}' } , cfg )" | mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)
+      sudo jem service restart
+
+success:
+  text: |
+    MongoDB Replica Set has been successfully created.  
+    
+    **Admin Panel**: [${nodes.nosqldb.url}](${nodes.nosqldb.url}) 
+    
+    The login and password of the cluster are sent to your email address.  
+
+    Authentication is enabled by default, please create users to access your databases.
+
+    * [Connection to MongoDB](http://docs.jelastic.com/connection-to-mongodb)
+    * [MongoDB Configuration Options](http://docs.mongodb.org/master/reference/configuration-options/)
