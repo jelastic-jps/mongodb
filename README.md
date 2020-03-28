@@ -1,4 +1,5 @@
-![MongoDB Database Replication](images/mongodb-logo.png)
+<img src="images/mongodb-logo.png" width="300" alt="MongoDB Database Replication"/>
+
 ## MongoDB Replica Set Cluster
 
 The JPS package deploys MongoDB Replica Set cluster that initially contains 3 replica set member nodes.
