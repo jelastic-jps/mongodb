@@ -81,7 +81,11 @@ actions:
       echo "if (db.isMaster().ismaster) { ${action} }" | mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)
       
   reconfigure: 
-    cmd[nosqldb]: |-
-      echo -e "use local\n ids = [${nodes.nosqldb.join(id,)}]\n cfg = db.system.replset.findOne( { '_id':'${globals.rsn}' } )\n for (var i = 0; i < ids.length; i++) { cfg.members[i].host = 'node' + ids[i]+ ':27017' }\n db.system.replset.update( { '_id':'${globals.rsn}' } , cfg )" | mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)
+    cmd[nosqldb]: |-    
+      sudo jem service stop
+      port=$((37000 + RANDOM%(1+38000-37000)))
+      mongod --dbpath /var/lib/mongo --port $port --bind_ip localhost &
+      sleep 3
+      echo -e "use local\n ids = [${nodes.nosqldb.join(id,)}]\n cfg = db.system.replset.findOne( { '_id':'${globals.rsn}' } )\n for (var i = 0; i < ids.length; i++) { cfg.members[i].host = 'node' + ids[i]+ ':27017' }\n db.system.replset.update( { '_id':'${globals.rsn}' } , cfg )" | mongo --port $port
       sudo jem service restart
     sync: true
