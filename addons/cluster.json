@@ -1,0 +1,19 @@
+{
+    "jps": "https://raw.githubusercontent.com/sych74/mongodb/master/addons/auto-cluster.yaml",
+    "defaultState": false,
+    "skipOnEnvInstall": true,
+    "nodeGroupData": {
+        "scalingMode": "STATELESS",
+        "skipNodeEmails": true,
+        "isResetServicePassword": "NODE",
+        "isRedeploySupport": true
+    },
+    "compatibleAddons": ["mongodb-auto-cluster"],
+    "validation": {
+        "scalingMode": "STATELESS"
+    },
+    "recommended": {
+        "cloudlets": 32
+    },
+    "description": "mongodb replica set auto-cluster"
+}
