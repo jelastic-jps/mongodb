@@ -7,7 +7,6 @@
         "skipNodeEmails": false,
         "isRedeploySupport": true
     },
-    "compatibleAddons": ["mongodb-auto-cluster"],
     "validation": {
         "minCount": 3,
         "minCloudlets": 4,
