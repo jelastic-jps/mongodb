@@ -4,8 +4,7 @@
     "skipOnEnvInstall": true,
     "nodeGroupData": {
         "scalingMode": "STATELESS",
-        "skipNodeEmails": true,
-        "isResetServicePassword": "NODE",
+        "skipNodeEmails": false,
         "isRedeploySupport": true
     },
     "compatibleAddons": ["mongodb-auto-cluster"],
