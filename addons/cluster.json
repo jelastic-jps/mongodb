@@ -10,10 +10,12 @@
     },
     "compatibleAddons": ["mongodb-auto-cluster"],
     "validation": {
+        "minCount": 3,
+        "minCloudlets": 2,
         "scalingMode": "STATELESS"
     },
     "recommended": {
         "cloudlets": 32
     },
-    "description": "mongodb replica set auto-cluster"
+    "description": "MongoDB Replica Set Auto-Clustering"
 }
