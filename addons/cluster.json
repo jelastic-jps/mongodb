@@ -11,7 +11,7 @@
     "compatibleAddons": ["mongodb-auto-cluster"],
     "validation": {
         "minCount": 3,
-        "minCloudlets": 2,
+        "minCloudlets": 4,
         "scalingMode": "STATELESS"
     },
     "recommended": {
