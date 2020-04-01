@@ -4,7 +4,7 @@
     "skipOnEnvInstall": true,
     "nodeGroupData": {
         "scalingMode": "STATELESS",
-        "skipNodeEmails": false,
+        "skipNodeEmails": true,
         "isRedeploySupport": true
     },
     "validation": {
