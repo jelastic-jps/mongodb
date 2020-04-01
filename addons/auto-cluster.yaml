@@ -48,7 +48,7 @@ actions:
         cat ${globals.key} | openssl enc -base64 -e -aes-256-cbc -salt -pass pass:$KEY_PASS
         MONGO="mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)"
         echo -e 'use admin\n db.changeUserPassword("admin", "${globals.pswd}")' | $MONGO --quiet >> /var/log/run.log
-        sed -i 's/\bpassword":[^,]*/password": "${globals.pswd}"/g' 
+        sed -i 's/\bpassword":[^,]*/password": "${globals.pswd}"/g' ${globals.app} 
     - cmd[${this}]: |-
         [ ! -f ${globals.key} ] && {          
           echo -e "${response.out}" | openssl enc -base64 -d -aes-256-cbc -salt -pass pass:$KEY_PASS > ${globals.key} && echo OK
@@ -57,7 +57,7 @@ actions:
         }
         sed -i "s@#replication:@replication:\\n replSetName: ${globals.rsn}@g" /etc/mongod.conf
         sed -i "s@security:@security:\\n keyFile: ${globals.key}@g" /etc/mongod.conf
-        sed -i 's/\bpassword":[^,]*/password": "${globals.pswd}"/g' 
+        sed -i 's/\bpassword":[^,]*/password": "${globals.pswd}"/g' ${globals.app}
         jem service restart
       user: root  
       
