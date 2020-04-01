@@ -13,6 +13,7 @@ globals:
   key: /home/jelastic/mongodb.key
   app: /home/jelastic/adminMongo/config/app.json
   rsn: rs0
+  pswd: ${fn.password(20)}
 
 onInstall:
   - if (${settings.clone:false}): 
@@ -44,7 +45,10 @@ actions:
           openssl rand -base64 756 > ${globals.key}
           chmod 400 ${globals.key}
         }
-        cat ${globals.key} | openssl enc -base64 -e -aes-256-cbc -salt -pass pass:$KEY_PASS      
+        cat ${globals.key} | openssl enc -base64 -e -aes-256-cbc -salt -pass pass:$KEY_PASS
+        MONGO="mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)"
+        echo -e 'use admin\n db.changeUserPassword("admin", "${globals.pswd}")' | $MONGO --quiet >> /var/log/run.log
+        sed -i 's/\bpassword":[^,]*/password": "${globals.pswd}"/g' 
     - cmd[${this}]: |-
         [ ! -f ${globals.key} ] && {          
           echo -e "${response.out}" | openssl enc -base64 -d -aes-256-cbc -salt -pass pass:$KEY_PASS > ${globals.key} && echo OK
@@ -53,6 +57,7 @@ actions:
         }
         sed -i "s@#replication:@replication:\\n replSetName: ${globals.rsn}@g" /etc/mongod.conf
         sed -i "s@security:@security:\\n keyFile: ${globals.key}@g" /etc/mongod.conf
+        sed -i 's/\bpassword":[^,]*/password": "${globals.pswd}"/g' 
         jem service restart
       user: root  
       
@@ -61,7 +66,8 @@ actions:
     - cmd[${nodes.nosqldb.master.id}]: |-
         IFS=',' read -ra nodes <<< "${nodes.nosqldb.join(id,)}"; members=""; i=0
         for n in "${nodes[@]}"; do [ $i -gt 0 ] && members="${members},"; members="${members}{ _id:${i}, host:\"node${n}:27017\" }"; let "i++"; done
-        echo "rs.initiate({_id:'${globals.rsn}', members:[${members}]})" | mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4) 
+        MONGO="mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)"
+        echo "rs.initiate({_id:'${globals.rsn}', members:[${members}]})" | $MONGO
 
   add:
     cmd[nosqldb]: |-
@@ -71,14 +77,16 @@ actions:
       } || {
         IFS=',' read -ra nodes <<< "${this}"; action=""; i=0
         for n in "${nodes[@]}"; do [ $i -gt 0 ] && action="${action}; "; action="${action}rs.add({host:\"node${n}:27017\"})"; let "i++"; done
-        echo "if (db.isMaster().ismaster) { ${action} }" | mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)
+        MONGO="mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)"
+        echo "if (db.isMaster().ismaster) { ${action} }" | $MONGO
       }  
       
   remove:
     cmd[nosqldb]: |-
       IFS=',' read -ra nodes <<< "${this}"; action=""; i=0
       for n in "${nodes[@]}"; do [ $i -gt 0 ] && action="${action}; "; action="${action}rs.remove(\"node${n}:27017\")"; let "i++"; done
-      echo "if (db.isMaster().ismaster) { ${action} }" | mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)
+      MONGO="mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)"
+      echo "if (db.isMaster().ismaster) { ${action} }" | $MONGO
       
   reconfigure: 
     cmd[nosqldb]: |-    
@@ -88,3 +96,6 @@ actions:
       sleep 3
       echo -e "use local\n ids = [${nodes.nosqldb.join(id,)}]\n cfg = db.system.replset.findOne( { '_id':'${globals.rsn}' } )\n for (var i = 0; i < ids.length; i++) { cfg.members[i].host = 'node' + ids[i]+ ':27017' }\n db.system.replset.update( { '_id':'${globals.rsn}' } , cfg )" | mongo --port $port
       sudo jem service restart
+      
+success: |
+  **Password**: ${globals.pswd}
