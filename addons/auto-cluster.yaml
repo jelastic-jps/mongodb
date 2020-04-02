@@ -15,9 +15,10 @@ globals:
   pswd: ${fn.password(10)}
   mongo: mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)
   add: |
-    IFS=',' read -ra nodes <<< "${this}"; action=""; i=0
+    IFS=',' read -ra nodes <<< "${ids}"; action=""; i=0
     for n in "${nodes[@]}"; do [ $i -gt 0 ] && action="${action}; "; action="${action}rs.add({host:\"node${n}:27017\"})"; let "i++"; done
-    echo "${action} " | ${globals.mongo}
+    echo "${action}"
+    echo "${action}" | ${globals.mongo}
 
 onInstall:
   - if (${settings.clone:false}): 
@@ -75,7 +76,8 @@ actions:
     - cmd[${nodes.nosqldb.master.id}]: |-
         primNodeId=$(echo "db.isMaster().primary" | ${globals.mongo} --quiet | cut -d':' -f1 | cut -d'e' -f2)
         nodeId=$(hostname -s | cut -d'-' -f1 | cut -d'e' -f2)
-        [[ "${nodeId}" == "${primNodeId}" ]] && {
+        [ "${nodeId}" == "${primNodeId}" ] && {
+          ids="${this}"
           ${globals.add}
           echo "COMPLETED"
         } || {
@@ -83,6 +85,7 @@ actions:
         }
     - if (response.out.indexOf("COMPLETED") == -1):     
         cmd[${response.out}]: |-
+          ids="${this}"
           ${globals.add}
       
   remove:
