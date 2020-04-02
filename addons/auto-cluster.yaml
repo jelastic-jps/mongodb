@@ -23,12 +23,13 @@ globals:
 onInstall:
   - if (${settings.clone:false}): 
     - reconfigure
-  - else: 
-    - configure: nosqldb
+  - else:
+    - configure
+    - uploadKeys: nosqldb
     - init
 
 onAfterScaleOut[nosqldb]: 
-  - configure: ${event.response.nodes.join(id,)}
+  - uploadKeys: ${event.response.nodes.join(id,)}
   - add: ${event.response.nodes.join(id,)}
 onAfterScaleIn[nosqldb]: 
   remove: ${event.response.nodes.join(id,)}
@@ -44,15 +45,17 @@ onAfterClone:
 actions:
   configure:
     - env.control.AddContainerEnvVars[nosqldb]:
-          vars: {"KEY_PASS":"${fn.password}"}
+        vars: {"KEY_PASS":"${fn.password}"}
+    - cmd[nosqldb]: |-
+        echo -e 'use admin\n db.changeUserPassword("admin", "${globals.pswd}")' | ${globals.mongo} --quiet >> /var/log/run.log
+        sed -i 's@\bpassword":[^,]*@password": "${globals.pswd}"@g' ${globals.app}
+  uploadKeys:
     - cmd[${nodes.nosqldb.master.id}]: |-
         [ ! -f ${globals.key} ] && {  
           openssl rand -base64 756 > ${globals.key}
           chmod 400 ${globals.key}
         }
         cat ${globals.key} | openssl enc -base64 -e -aes-256-cbc -salt -pass pass:$KEY_PASS
-        echo -e 'use admin\n db.changeUserPassword("admin", "${globals.pswd}")' | ${globals.mongo} --quiet >> /var/log/run.log
-        sed -i 's/\bpassword":[^,]*/password": "${globals.pswd}"/g' ${globals.app}
     - cmd[${this}]: |-
         [ ! -f ${globals.key} ] && {          
           echo -e "${response.out}" | openssl enc -base64 -d -aes-256-cbc -salt -pass pass:$KEY_PASS > ${globals.key} && echo OK
@@ -61,7 +64,6 @@ actions:
         }
         sed -i "s@#replication:@replication:\\n replSetName: ${globals.rsn}@g" /etc/mongod.conf
         sed -i "s@security:@security:\\n keyFile: ${globals.key}@g" /etc/mongod.conf
-        sed -i 's@\bpassword":[^,]*@password": "${globals.pswd}"@g' ${globals.app}
         jem service restart
       user: root  
       
@@ -87,7 +89,7 @@ actions:
         cmd[${response.out}]: |-
           ids="${this}"
           ${globals.add}
-      
+
   remove:
     cmd[nosqldb]: |-
       IFS=',' read -ra nodes <<< "${this}"; action=""; i=0
