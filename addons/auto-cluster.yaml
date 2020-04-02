@@ -34,6 +34,10 @@ onInstall:
 onAfterScaleOut[nosqldb]: 
   - uploadKeys: ${event.response.nodes.join(id,)}
   - add: ${event.response.nodes.join(id,)}
+
+onBeforeScaleIn[nosqldb]: 
+  stepDown: ${event.response.nodes.join(id,)}
+
 onAfterScaleIn[nosqldb]: 
   remove: ${event.response.nodes.join(id,)}
 
@@ -80,14 +84,17 @@ actions:
   add:
     execOnPrimary: 
       ids: ${this}
-      act: ${globals.add}          
+      act: ${globals.add}
+
   remove:
-    - cmd[${this}]: |-
-        echo -e "rs.stepDown()\n use admin\n db.shutdownServer()\n " | ${globals.mongo}
-    - execOnPrimary:       
+    execOnPrimary:       
         ids: ${this}
-        act: ${globals.remove}          
-      
+        act: ${globals.remove}
+
+  stepDown:
+    cmd[${this}]: |-
+      echo -e "rs.stepDown()\n use admin\n db.shutdownServer()\n " | ${globals.mongo}    
+
   reconfigure: 
     cmd[nosqldb]: |-    
       sudo jem service stop
