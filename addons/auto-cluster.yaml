@@ -45,7 +45,7 @@ actions:
   uploadKeys:
     - cmd[${nodes.nosqldb.master.id}]: mongo-cluster.sh generateKey
     - cmd[${this}]: |-
-        mongo-cluster.sh uploadKey "${response.out}"
+        mongo-cluster.sh uploadKey '${response.out}'
         mongo-cluster.sh adjustConf
       user: root
       
