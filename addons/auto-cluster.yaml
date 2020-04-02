@@ -89,7 +89,8 @@ actions:
         cmd[${response.out}]: |-
           ids="${this}"
           ${globals.add}
-
+          echo "OK"
+          
   remove:
     cmd[nosqldb]: |-
       IFS=',' read -ra nodes <<< "${this}"; action=""; i=0
