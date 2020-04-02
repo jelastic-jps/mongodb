@@ -18,7 +18,7 @@ globals:
     IFS=',' read -ra nodes <<< "${ids}"; action=""; i=0
     for n in "${nodes[@]}"; do [ $i -gt 0 ] && action="${action}; "; action="${action}rs.add({host:\"node${n}:27017\"})"; let "i++"; done
     echo "${action}" | ${globals.mongo}
-  remove:
+  remove: |
     IFS=',' read -ra nodes <<< "${ids}"; action=""; i=0
     for n in "${nodes[@]}"; do [ $i -gt 0 ] && action="${action}; "; action="${action}rs.remove(\"node${n}:27017\")"; let "i++"; done
     echo "${action}" | ${globals.mongo}
@@ -112,8 +112,7 @@ actions:
         cmd[${response.out}]: |-
           ids="${this.ids}"
           ${this.act}
-          echo "OK"
-    
+          echo "OK"    
   
 success: |
   **Admin Panel**: [https://node${nodes.nosqldb.master.id}-${env.domain}/](https://node${nodes.nosqldb.master.id}-${env.domain}/)  
