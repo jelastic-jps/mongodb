@@ -13,11 +13,11 @@ globals:
   app: /home/jelastic/adminMongo/config/app.json
   rsn: rs0
   pswd: ${fn.password(10)}
+  mongo: mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)
   add: |
     IFS=',' read -ra nodes <<< "${this}"; action=""; i=0
     for n in "${nodes[@]}"; do [ $i -gt 0 ] && action="${action}; "; action="${action}rs.add({host:\"node${n}:27017\"})"; let "i++"; done
-    MONGO="mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)"
-    echo "${action} " | $MONGO
+    echo "${action} " | ${globals.mongo}
 
 onInstall:
   - if (${settings.clone:false}): 
@@ -50,8 +50,7 @@ actions:
           chmod 400 ${globals.key}
         }
         cat ${globals.key} | openssl enc -base64 -e -aes-256-cbc -salt -pass pass:$KEY_PASS
-        MONGO="mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)"
-        echo -e 'use admin\n db.changeUserPassword("admin", "${globals.pswd}")' | $MONGO --quiet >> /var/log/run.log
+        echo -e 'use admin\n db.changeUserPassword("admin", "${globals.pswd}")' | ${globals.mongo} --quiet >> /var/log/run.log
         sed -i 's/\bpassword":[^,]*/password": "${globals.pswd}"/g' ${globals.app}
     - cmd[${this}]: |-
         [ ! -f ${globals.key} ] && {          
@@ -70,12 +69,11 @@ actions:
     - cmd[${nodes.nosqldb.master.id}]: |-
         IFS=',' read -ra nodes <<< "${nodes.nosqldb.join(id,)}"; members=""; i=0
         for n in "${nodes[@]}"; do [ $i -gt 0 ] && members="${members},"; members="${members}{ _id:${i}, host:\"node${n}:27017\" }"; let "i++"; done
-        MONGO="mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)"
-        echo "rs.initiate({_id:'${globals.rsn}', members:[${members}]})" | $MONGO
+        echo "rs.initiate({_id:'${globals.rsn}', members:[${members}]})" | ${globals.mongo}
 
   add:
     - cmd[${nodes.nosqldb.master.id}]: |-
-        primNodeId=$(echo "db.isMaster().primary" | $MONGO --quiet | cut -d':' -f1 | cut -d'e' -f2)
+        primNodeId=$(echo "db.isMaster().primary" | ${globals.mongo} --quiet | cut -d':' -f1 | cut -d'e' -f2)
         nodeId=$(hostname -s | cut -d'-' -f1 | cut -d'e' -f2)
         [[ "${nodeId}" == "${primNodeId}" ]] && {
           ${globals.add}
@@ -91,8 +89,7 @@ actions:
     cmd[nosqldb]: |-
       IFS=',' read -ra nodes <<< "${this}"; action=""; i=0
       for n in "${nodes[@]}"; do [ $i -gt 0 ] && action="${action}; "; action="${action}rs.remove(\"node${n}:27017\")"; let "i++"; done
-      MONGO="mongo -u admin -p $(cat ${globals.app} | grep pass | cut -d'"' -f4)"
-      echo "if (db.isMaster().ismaster) { ${action} }" | $MONGO
+      echo "if (db.isMaster().ismaster) { ${action} }" | ${globals.mongo}
       
   reconfigure: 
     cmd[nosqldb]: |-    
@@ -105,5 +102,5 @@ actions:
       
 success: |
   **Admin Panel**: [https://node${nodes.nosqldb.master.id}-${env.domain}/](https://node${nodes.nosqldb.master.id}-${env.domain}/)  
-  **User**: admin
+  **User**: admin  
   **Password**: ${globals.pswd}  
