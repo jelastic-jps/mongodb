@@ -17,9 +17,12 @@ globals:
   add: |
     IFS=',' read -ra nodes <<< "${ids}"; action=""; i=0
     for n in "${nodes[@]}"; do [ $i -gt 0 ] && action="${action}; "; action="${action}rs.add({host:\"node${n}:27017\"})"; let "i++"; done
-    echo "${action}"
     echo "${action}" | ${globals.mongo}
-
+  remove:
+    IFS=',' read -ra nodes <<< "${ids}"; action=""; i=0
+    for n in "${nodes[@]}"; do [ $i -gt 0 ] && action="${action}; "; action="${action}rs.remove(\"node${n}:27017\")"; let "i++"; done
+    echo "${action}" | ${globals.mongo}
+    
 onInstall:
   - if (${settings.clone:false}): 
     - reconfigure
@@ -75,27 +78,15 @@ actions:
         echo "rs.initiate({_id:'${globals.rsn}', members:[${members}]})" | ${globals.mongo}
 
   add:
-    - cmd[${nodes.nosqldb.master.id}]: |-
-        primNodeId=$(echo "db.isMaster().primary" | ${globals.mongo} --quiet | cut -d':' -f1 | cut -d'e' -f2)
-        nodeId=$(hostname -s | cut -d'-' -f1 | cut -d'e' -f2)
-        [ "${nodeId}" == "${primNodeId}" ] && {
-          ids="${this}"
-          ${globals.add}
-          echo "COMPLETED"
-        } || {
-          echo "${primNodeId}"
-        }
-    - if (response.out.indexOf("COMPLETED") == -1):     
-        cmd[${response.out}]: |-
-          ids="${this}"
-          ${globals.add}
-          echo "OK"
-          
+    execOnPrimary: 
+      ids: ${this}
+      act: ${globals.add}          
   remove:
-    cmd[nosqldb]: |-
-      IFS=',' read -ra nodes <<< "${this}"; action=""; i=0
-      for n in "${nodes[@]}"; do [ $i -gt 0 ] && action="${action}; "; action="${action}rs.remove(\"node${n}:27017\")"; let "i++"; done
-      echo "if (db.isMaster().ismaster) { ${action} }" | ${globals.mongo}
+    - cmd[${this}]: |-
+        echo -e "rs.stepDown()\n use admin\n db.shutdownServer()\n " | ${globals.mongo}
+    - execOnPrimary:       
+        ids: ${this}
+        act: ${globals.remove}          
       
   reconfigure: 
     cmd[nosqldb]: |-    
@@ -105,7 +96,25 @@ actions:
       sleep 3
       echo -e "use local\n ids = [${nodes.nosqldb.join(id,)}]\n cfg = db.system.replset.findOne( { '_id':'${globals.rsn}' } )\n for (var i = 0; i < ids.length; i++) {cfg.members[i].host = 'node' + ids[i]+ ':27017'}\n db.system.replset.update({ '_id':'${globals.rsn}' }, cfg)" | mongo --port $port
       sudo jem service restart
-      
+  
+  execOnPrimary:
+    - cmd[${nodes.nosqldb.master.id}]: |-
+        primNodeId=$(echo "db.isMaster().primary" | ${globals.mongo} --quiet | cut -d':' -f1 | cut -d'e' -f2)
+        nodeId=$(hostname -s | cut -d'-' -f1 | cut -d'e' -f2)
+        [ "${nodeId}" == "${primNodeId}" ] && {
+          ids="${this.ids}"
+          ${this.act}
+          echo "COMPLETED"
+        } || {
+          echo "${primNodeId}"
+        }
+    - if (response.out.indexOf("COMPLETED") == -1):     
+        cmd[${response.out}]: |-
+          ids="${this.ids}"
+          ${this.act}
+          echo "OK"
+    
+  
 success: |
   **Admin Panel**: [https://node${nodes.nosqldb.master.id}-${env.domain}/](https://node${nodes.nosqldb.master.id}-${env.domain}/)  
   **User**: admin  
