@@ -43,7 +43,7 @@ actions:
         vars: {"KEY_PASS":"${fn.password}"}
     - cmd[nosqldb]: mongo-cluster.sh changePassword ${globals.pswd}
   uploadKey:
-    - cmd[${nodes.nosqldb.master.id}]: mongo-cluster.sh generateKey
+    - cmd[${nodes.nosqldb.master.id}]: mongo-cluster.sh getKey
     - cmd[${this}]: |-
         mongo-cluster.sh uploadKey '${response.out}'
         mongo-cluster.sh adjustConf
