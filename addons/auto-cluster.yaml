@@ -71,6 +71,7 @@ actions:
 
   stepDown:
     cmd[${this}]: mongo-cluster.sh stepDown
+    sync: true
 
   reconfigure: 
     cmd[nosqldb]: mongo-cluster.sh afterClone ${nodes.nosqldb.join(id,)}  
