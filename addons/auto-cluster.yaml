@@ -22,6 +22,7 @@ onInstall:
 onAfterScaleOut[nosqldb]: 
   - uploadKey: ${event.response.nodes.join(id,)}
   - add: ${event.response.nodes.join(id,)}
+  - setAdminAppPswd: ${event.response.nodes.join(id,)}
 
 onBeforeScaleIn[nosqldb]: 
   stepDown: ${event.response.nodes.join(id,)}
@@ -42,13 +43,18 @@ actions:
     - env.control.AddContainerEnvVars[nosqldb]:
         vars: {"KEY_PASS":"${fn.password}"}
     - cmd[nosqldb]: mongo-cluster.sh changePassword ${globals.pswd}
+    
   uploadKey:
     - cmd[${nodes.nosqldb.master.id}]: mongo-cluster.sh getKey
     - cmd[${this}]: |-
         mongo-cluster.sh uploadKey '${response.out}'
         mongo-cluster.sh adjustConf
       user: root
-      
+
+  setAdminAppPswd: 
+    - cmd[${nodes.nosqldb.master.id}]: mongo-cluster.sh getAdminAppPswd
+    - cmd[${this}]: mongo-cluster.sh setAdminAppPswd '${response.out}'
+
   init: 
     - sleep: 3000
     - cmd[${nodes.nosqldb.master.id}]: mongo-cluster.sh initCluster ${nodes.nosqldb.join(id,)}
