@@ -53,7 +53,7 @@ actions:
 
   setAdminAppPswd: 
     - cmd[${nodes.nosqldb.master.id}]: mongo-cluster.sh getAdminAppPswd
-    - cmd[${this}]: mongo-cluster.sh setAdminAppPswd '${response.out}'
+    - cmd[${this}]: mongo-cluster.sh setAdminAppPswd '${response.out}' true
 
   init: 
     - sleep: 3000
