@@ -18,7 +18,8 @@ nodes:
     cloudlets: 16    
     nodeGroup: nosqldb
     scalingMode: STATELESS
-    password: ${fn.password}
+    skipNodeEmails: true
+    password: ${fn.password}    
     env:
       ON_ENV_INSTALL: ${baseUrl}/addons/auto-cluster.yaml
 
