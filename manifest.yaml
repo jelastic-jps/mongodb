@@ -22,14 +22,3 @@ nodes:
     password: ${fn.password}    
     env:
       ON_ENV_INSTALL: ${baseUrl}/addons/auto-cluster.yaml
-
-success:
-  text: |
-    MongoDB Replica Set has been successfully created.  
-    
-    **Admin Panel**: [${nodes.nosqldb.url}](${nodes.nosqldb.url}) 
-    
-    The login and password of the cluster are sent to your email address.
-
-    * [Connection to MongoDB](http://docs.jelastic.com/connection-to-mongodb)
-    * [MongoDB Configuration Options](http://docs.mongodb.org/master/reference/configuration-options/)

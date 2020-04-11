@@ -76,7 +76,14 @@ actions:
   reconfigure: 
     cmd[nosqldb]: mongo-cluster.sh afterClone ${nodes.nosqldb.join(id,)}  
   
-success: |
-  **Admin Panel**: [https://node${nodes.nosqldb.master.id}-${env.domain}/](https://node${nodes.nosqldb.master.id}-${env.domain}/)  
+success: |   
+  **Admin Panel**: [${nodes.nosqldb.url}](${nodes.nosqldb.url}) 
   **User**: admin  
   **Password**: ${globals.pswd}  
+
+  Useful links:
+  * [Connection to MongoDB](http://docs.jelastic.com/connection-to-mongodb)
+  * [MongoDB Replication Overview](https://docs.mongodb.com/manual/replication/)
+
+    
+  
