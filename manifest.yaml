@@ -22,3 +22,9 @@ nodes:
     password: ${fn.password}    
     env:
       ON_ENV_INSTALL: ${baseUrl}/addons/auto-cluster.yaml
+
+success: 
+  text: |
+    **Admin Panel**: [${nodes.nosqldb.url}](${nodes.nosqldb.url})  
+    **User**: admin  
+    **Password**: has been sent to your email box
