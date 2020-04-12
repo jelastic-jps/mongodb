@@ -42,48 +42,45 @@ actions:
   configure:
     - env.control.AddContainerEnvVars[nosqldb]:
         vars: {"KEY_PASS":"${fn.password}"}
-    - cmd[nosqldb]: mongo-cluster.sh changePassword ${globals.pswd}
+    - cmd[nosqldb]: jcm changePassword ${globals.pswd}
     
   uploadKey:
-    - cmd[${nodes.nosqldb.master.id}]: mongo-cluster.sh getKey
+    - cmd[${nodes.nosqldb.master.id}]: jcm getKey
     - cmd[${this}]: |-
-        mongo-cluster.sh uploadKey '${response.out}'
-        mongo-cluster.sh adjustConf
+        jcm uploadKey '${response.out}'
+        jcm adjustConf
       user: root
 
   setAdminAppPswd: 
-    - cmd[${nodes.nosqldb.master.id}]: mongo-cluster.sh getAdminAppPswd
-    - cmd[${this}]: mongo-cluster.sh setAdminAppPswd '${response.out}' true
+    - cmd[${nodes.nosqldb.master.id}]: jcm getAdminAppPswd
+    - cmd[${this}]: jcm setAdminAppPswd '${response.out}' true
 
   init: 
     - sleep: 3000
-    - cmd[${nodes.nosqldb.master.id}]: mongo-cluster.sh initCluster ${nodes.nosqldb.join(id,)}
+    - cmd[${nodes.nosqldb.master.id}]: jcm initCluster ${nodes.nosqldb.join(id,)}
 
   add:
-    - cmd[${nodes.nosqldb.master.id}]: mongo-cluster.sh addMember ${this}
+    - cmd[${nodes.nosqldb.master.id}]: jcm addMember ${this}
     - if (response.out.indexOf("COMPLETED") == -1):     
-        cmd[${response.out}]: mongo-cluster.sh addMember ${this}
+        cmd[${response.out}]: jcm addMember ${this}
 
   remove:
-    - cmd[${nodes.nosqldb.master.id}]: mongo-cluster.sh removeMember ${this}
+    - cmd[${nodes.nosqldb.master.id}]: jcm removeMember ${this}
     - if (response.out.indexOf("COMPLETED") == -1):     
-        cmd[${response.out}]: mongo-cluster.sh removeMember ${this}
+        cmd[${response.out}]: jcm removeMember ${this}
 
   stepDown:
-    cmd[${this}]: mongo-cluster.sh stepDown
+    cmd[${this}]: jcm stepDown
     sync: true
 
   reconfigure: 
-    cmd[nosqldb]: mongo-cluster.sh afterClone ${nodes.nosqldb.join(id,)}  
+    cmd[nosqldb]: jcm afterClone ${nodes.nosqldb.join(id,)}  
   
 success: |   
-  **Admin Panel**: [${nodes.nosqldb.url}](${nodes.nosqldb.url}) 
+  **Admin Panel**: [${nodes.nosqldb.url}](${nodes.nosqldb.url})  
   **User**: admin  
-  **Password**: ${globals.pswd}  
+  **Password**: ${globals.pswd}
 
-  Useful links:
   * [Connection to MongoDB](http://docs.jelastic.com/connection-to-mongodb)
   * [MongoDB Replication Overview](https://docs.mongodb.com/manual/replication/)
-
-    
   
