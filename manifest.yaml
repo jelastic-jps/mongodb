@@ -24,6 +24,7 @@ nodes:
       ON_ENV_INSTALL: ${baseUrl}/addons/auto-cluster.yaml
 
 success: 
+  email: false
   text: |
     **Admin Panel**: [${nodes.nosqldb.url}](${nodes.nosqldb.url})  
     **User**: admin  
