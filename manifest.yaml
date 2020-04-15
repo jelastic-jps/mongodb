@@ -19,9 +19,8 @@ nodes:
     nodeGroup: nosqldb
     scalingMode: STATELESS
     skipNodeEmails: true
-    password: ${fn.password}    
-    env:
-      ON_ENV_INSTALL: ${baseUrl}/addons/auto-cluster.yaml
+    password: ${fn.password}  
+    cluster: true
 
 success: 
   email: false
