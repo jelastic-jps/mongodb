@@ -13,7 +13,7 @@ description: Test of Replica Set status
 
 onInstall:
   - cmd[${nodes.nosqldb.master.id}]: |-  
-      printf "m = rs.status().members
+      printf "m = rs.status().members || []
       ok=true;
       if (m.length != ${nodes.nosqldb.length}) {
         printjson({result:'error', message:'Members length = ' + m.length + ', nodes length = ${nodes.nosqldb.length}.'})
