@@ -37,7 +37,22 @@ onAfterClone:
     settings: 
       nodeGroup: ${settings.nodeGroup}      
       clone: true  
-          
+
+onBeforeResetServicePassword[nosqldb]:
+  - setGlobals: 
+      pswd: ${fn.password(10)}
+  - cmd[${nodes.nosqldb.master.id}]: jcm execOnPrimary changePassword ${globals.pswd}
+  - if (response.out.indexOf("COMPLETED") == -1):     
+      cmd[${response.out}]: jcm execOnPrimary changePassword ${globals.pswd}
+  - cmd[nosqldb]: |-
+      jcm setAdminAppPswd ${globals.pswd}
+      sudo service adminMongo reload
+  - message.email.Send:
+      to: ${user.email}
+      subject: MongoDB Credentials
+      body: ${globals.pswd} 
+  - stopEvent
+
 actions:
   configure:
     - env.control.AddContainerEnvVars[nosqldb]:
