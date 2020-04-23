@@ -10,7 +10,7 @@ nodeGroupAlias:
 
 globals: 
   pswd: ${fn.password(10)}
-    
+ 
 onInstall:
   - if (${settings.clone:false}): 
     - reconfigure
@@ -95,7 +95,7 @@ actions:
   
   
 success: |   
-  **Admin Panel**: [${nodes.nosqldb.url}](${nodes.nosqldb.url})  
+  **Admin Panel**: [${nodes.nosqldb.master.url}](${nodes.nosqldb.master.url})  
   **User**: admin  
   **Password**: ${globals.pswd}
 
