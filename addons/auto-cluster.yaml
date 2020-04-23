@@ -10,10 +10,11 @@ nodeGroupAlias:
 
 globals: 
   pswd: ${fn.password(10)}
-    
+ 
 onInstall:
   - if (${settings.clone:false}): 
     - reconfigure
+    - resetPassword
   - else:
     - configure
     - uploadKey: nosqldb
@@ -37,7 +38,15 @@ onAfterClone:
     settings: 
       nodeGroup: ${settings.nodeGroup}      
       clone: true  
-          
+
+onBeforeResetServicePassword[nosqldb]:
+  - resetPassword
+  - message.email.Send:
+      to: ${user.email}
+      subject: MongoDB Credentials
+      body: ${globals.pswd} 
+  - stopEvent
+
 actions:
   configure:
     - env.control.AddContainerEnvVars[nosqldb]:
@@ -76,8 +85,17 @@ actions:
   reconfigure: 
     cmd[nosqldb]: jcm afterClone ${nodes.nosqldb.join(id,)}  
   
+  resetPassword:
+    - setGlobals: 
+        pswd: ${fn.password(10)}
+    - cmd[${nodes.nosqldb.master.id}]: jcm execOnPrimary changePassword ${globals.pswd}
+    - if (response.out.indexOf("COMPLETED") == -1):     
+        cmd[${response.out}]: jcm execOnPrimary changePassword ${globals.pswd}
+    - cmd[nosqldb]: jcm setAdminAppPswd ${globals.pswd}
+  
+  
 success: |   
-  **Admin Panel**: [${nodes.nosqldb.url}](${nodes.nosqldb.url})  
+  **Admin Panel**: [${nodes.nosqldb.master.url}](${nodes.nosqldb.master.url})  
   **User**: admin  
   **Password**: ${globals.pswd}
 
