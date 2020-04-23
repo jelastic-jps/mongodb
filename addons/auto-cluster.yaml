@@ -44,9 +44,7 @@ onBeforeResetServicePassword[nosqldb]:
   - cmd[${nodes.nosqldb.master.id}]: jcm execOnPrimary changePassword ${globals.pswd}
   - if (response.out.indexOf("COMPLETED") == -1):     
       cmd[${response.out}]: jcm execOnPrimary changePassword ${globals.pswd}
-  - cmd[nosqldb]: |-
-      jcm setAdminAppPswd ${globals.pswd}
-      sudo service adminMongo reload
+  - cmd[nosqldb]: jcm setAdminAppPswd ${globals.pswd}
   - message.email.Send:
       to: ${user.email}
       subject: MongoDB Credentials
