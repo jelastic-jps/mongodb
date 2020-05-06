@@ -67,6 +67,7 @@ actions:
   init: 
     - sleep: 3000
     - cmd[${nodes.nosqldb.master.id}]: jcm initCluster ${nodes.nosqldb.join(id,)}
+    - cmd[nosqldb]: jcm restartAdminApp
 
   add:
     - cmd[${nodes.nosqldb.master.id}]: jcm addMember ${this}
