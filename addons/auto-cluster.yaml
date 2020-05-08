@@ -33,6 +33,9 @@ onBeforeScaleIn[nosqldb]:
 
 onAfterScaleIn[nosqldb]: 
   remove: ${event.response.nodes.join(id,)}
+  
+onAfterStart[nosqldb]:
+  - cmd[nosqldb]: jcm restartAdminApp
 
 onAfterClone:
   - script: delete MANIFEST.id; return {result:0, jps:MANIFEST};
