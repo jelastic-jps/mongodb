@@ -19,6 +19,9 @@ onInstall:
     - configure
     - uploadKey: nosqldb
     - init
+    
+onAfterRedeployContainer[nosqldb]:
+  - cmd[nosqldb]: jcm restartAdminApp
 
 onAfterScaleOut[nosqldb]: 
   - uploadKey: ${event.response.nodes.join(id,)}
