@@ -43,21 +43,14 @@ onAfterClone:
     envName: ${event.response.env.envName}    
     settings: 
       nodeGroup: ${settings.nodeGroup}      
-      clone: true  
-
-onBeforeResetServicePassword[nosqldb]:
-  - resetPassword
-  - message.email.Send:
-      to: ${user.email}
-      subject: MongoDB Credentials
-      body: ${globals.pswd} 
-  - stopEvent
+      clone: true 
 
 actions:
   configure:
     - env.control.AddContainerEnvVars[nosqldb]:
         vars: {"KEY_PASS":"${fn.password}"}
-    - cmd[nosqldb]: jcm changePassword ${globals.pswd}
+    - cmd[nosqldb]: jem passwd set -p ${globals.pswd}
+      user: root
     
   uploadKey:
     - cmd[${nodes.nosqldb.master.id}]: jcm getKey
@@ -87,7 +80,7 @@ actions:
 
   stepDown:
     cmd[${this}]: jcm stepDown
-    sync: true
+    sync: true 
 
   reconfigure: 
     cmd[nosqldb]: jcm afterClone ${nodes.nosqldb.join(id,)}  
@@ -95,10 +88,7 @@ actions:
   resetPassword:
     - setGlobals: 
         pswd: ${fn.password(10)}
-    - cmd[${nodes.nosqldb.master.id}]: jcm execOnPrimary changePassword ${globals.pswd}
-    - if (response.out.indexOf("COMPLETED") == -1):     
-        cmd[${response.out}]: jcm execOnPrimary changePassword ${globals.pswd}
-    - cmd[nosqldb]: jcm setAdminAppPswd ${globals.pswd}
+    - cmd[nosqldb]: jem passwd set -p ${globals.pswd}
   
   
 success: |   
@@ -108,4 +98,3 @@ success: |
 
   * [Connection to MongoDB](http://docs.jelastic.com/connection-to-mongodb)
   * [MongoDB Replication Overview](https://docs.mongodb.com/manual/replication/)
-  
