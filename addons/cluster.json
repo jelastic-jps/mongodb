@@ -1,5 +1,5 @@
 {
-    "jps": "https://raw.githubusercontent.com/sych74/mongodb/master/addons/auto-cluster.yaml",
+    "jps": "https://raw.githubusercontent.com/jelastic-jps/mongodb/master/addons/auto-cluster.yaml",
     "defaultState": false,
     "skipOnEnvInstall": true,
     "nodeGroupData": {
