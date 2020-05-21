@@ -27,6 +27,7 @@ onAfterScaleOut[nosqldb]:
   - uploadKey: ${event.response.nodes.join(id,)}
   - add: ${event.response.nodes.join(id,)}
   - setAdminAppPswd: ${event.response.nodes.join(id,)}
+  - cmd [${event.response.nodes.join(id,)}]: jcm restartAdminApp
 
 onBeforeScaleIn[nosqldb]: 
   stepDown: ${event.response.nodes.join(id,)}
