@@ -29,6 +29,9 @@ onAfterScaleOut[nosqldb]:
   - setAdminAppPswd: ${event.response.nodes.join(id,)}
   - cmd [${event.response.nodes.join(id,)}]: jcm restartAdminApp
 
+onAfterResetServicePassword[nosqldb]:
+  - cmd[nosqldb]: jcm restartAdminApp
+
 onBeforeScaleIn[nosqldb]: 
   stepDown: ${event.response.nodes.join(id,)}
 
