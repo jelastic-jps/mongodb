@@ -2,7 +2,8 @@
 type: install
 id: mongodb-replica-set
 name: MongoDB Replica Set
-category: apps/clustered-dbs
+categories: 
+  - apps/clusters
 homepage: http://www.mongodb.org/
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/mongodb/master
 logo: /images/mongodb-70x70.png
