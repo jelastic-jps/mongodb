@@ -15,7 +15,7 @@ onInstall:
   - if (${settings.clone:false}): 
     - reconfigure
     - resetPassword
-    - cmd[nosqldb]: jcm restartAdminApp
+    - cmd[nosqldb]: sudo service mongo-express restart
   - else:
     - configure
     - uploadKey: nosqldb
