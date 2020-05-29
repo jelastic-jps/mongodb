@@ -15,6 +15,7 @@ onInstall:
   - if (${settings.clone:false}): 
     - reconfigure
     - resetPassword
+    - cmd[nosqldb]: jcm restartAdminApp
   - else:
     - configure
     - uploadKey: nosqldb
