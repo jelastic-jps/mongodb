@@ -16,5 +16,5 @@
     "recommended": {
         "cloudlets": 32
     },
-    "description": "<h3>Highly Available Replica Set</h3>Automatic clusterization of the MongoDB database instances into a highly-available and reliable replica set with auto-discovery of the new nodes. <a href='https://docs.jelastic.com/mongodb-auto-clustering'>Learn More</a><img width='298' height='168' src='https://raw.githubusercontent.com/jelastic/icons/master/mongodb/jelastic/images/tip-cluster-ps.svg?sanitize=true'>"
+    "description": "<h3>Highly Available Replica Set</h3>Automatic clusterization of the MongoDB database instances into a highly-available and reliable replica set with auto-discovery of the new nodes. <a href='https://docs.jelastic.com/mongodb-auto-clustering'>Learn More</a><img width='290' height='163' src='https://raw.githubusercontent.com/jelastic/icons/master/mongodb/jelastic/images/tip-cluster-ps.svg?sanitize=true'>"
 }
