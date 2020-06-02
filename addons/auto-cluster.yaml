@@ -87,7 +87,6 @@ actions:
 
   reconfigure: 
     cmd[nosqldb]: jcm afterClone ${nodes.nosqldb.join(id,)}
-    sync: true
   
   resetPassword:
     - setGlobals: 
