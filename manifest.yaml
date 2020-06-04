@@ -13,6 +13,21 @@ description: |
   Replica sets should always have an odd number of members. 
   This ensures that elections will proceed smoothly. For more about designing replica sets, see the [Replication overview](https://docs.mongodb.com/manual/replication/).
 
+onBeforeInit: |
+  var minSameNodes = 3;
+  var settings = jps.settings || {fields: []};
+  var fields = settings.fields;
+  var quotas = jelastic.billing.account.GetQuotas('environment.maxsamenodescount').array;
+  for (var i = 0; i < quotas.length; i++){
+    var q = quotas[i], n = toNative(q.quota.name);
+    if (n == 'environment.maxsamenodescount' && q.value < minSameNodes) {
+      fields.push(
+        {"type": "compositefield","height": 0,"hideLabel": true,"width": 0,"items": [{"height": 0,"type": "string","required": true}]}
+      );
+    };
+  }
+  return { result: 0, settings: settings };
+
 nodes:
   - nodeType: mongodb
     count: 3
