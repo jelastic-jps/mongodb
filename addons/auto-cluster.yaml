@@ -16,6 +16,8 @@ onInstall:
     - reconfigure
     - resetPassword
     - cmd[nosqldb]: sudo service mongo-express restart
+    - cmd[nosqldb]: jcm recoverBrokenSecondary
+      user: root
   - else:
     - configure
     - uploadKey: nosqldb
