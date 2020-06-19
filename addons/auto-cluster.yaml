@@ -41,7 +41,7 @@ onBeforeScaleIn[nosqldb]:
 onAfterScaleIn[nosqldb]: 
   remove: ${event.response.nodes.join(id,)}
 
-onAfterMigrate:	
+onAfterMigrate:
   - reconfigure
   
 onAfterClone:
