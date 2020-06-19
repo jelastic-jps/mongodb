@@ -41,6 +41,9 @@ onBeforeScaleIn[nosqldb]:
 onAfterScaleIn[nosqldb]: 
   remove: ${event.response.nodes.join(id,)}
 
+onAfterMigrate:
+  - reconfigure
+
 onAfterClone:
   - script: delete MANIFEST.id; return {result:0, jps:MANIFEST};
   - install: ${response.jps}
