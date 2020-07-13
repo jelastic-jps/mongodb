@@ -9,7 +9,7 @@ nodeGroupAlias:
   ${settings.nodeGroup}: nosqldb
 
 globals: 
-  pswd: ${nodes.nosqldb.password:[fn.password(10)]}
+  pswd: ${passwords.nosqldb.root:[fn.password(10)]}
  
 onInstall:
   - if (${settings.clone:false}): 
