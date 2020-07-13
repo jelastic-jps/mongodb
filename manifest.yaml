@@ -28,6 +28,9 @@ onBeforeInit: |
   }
   return { result: 0, settings: settings };
 
+globals:
+  password: ${fn.password}
+
 nodes:
   - nodeType: mongodb
     count: 3
@@ -35,8 +38,9 @@ nodes:
     nodeGroup: nosqldb
     scalingMode: STATELESS
     skipNodeEmails: true
-    password: ${fn.password}  
-    cluster: true
+    password: ${globals.password}
+    cluster:
+      password: ${globals.password}
 
 success: 
   email: false
