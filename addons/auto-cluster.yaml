@@ -74,6 +74,8 @@ actions:
     - sleep: 3000
     - cmd[${nodes.nosqldb.master.id}]: jcm initCluster ${nodes.nosqldb.join(id,)}
     - cmd[nosqldb]: jcm setAdminAppPswd ${globals.pswd}
+    - cmd[nosqldb]: rm -f /var/log/mongo-express/error.log
+      user: root
     - cmd[nosqldb]: jcm restartAdminApp || true
 
   add:
@@ -97,7 +99,6 @@ actions:
     - setGlobals: 
         pswd: ${fn.password(10)}
     - cmd[nosqldb]: jem passwd set -p ${globals.pswd}
-  
   
 success: |   
   **Admin Panel**: [${nodes.nosqldb.master.url}](${nodes.nosqldb.master.url})  
