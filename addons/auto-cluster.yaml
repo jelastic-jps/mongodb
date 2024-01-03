@@ -14,7 +14,7 @@ globals:
 onInstall:
   - if (${settings.clone:false}): 
     - reconfigure
-    - resetPassword
+    - resetMongoPasswd
     - cmd[nosqldb]: sudo service mongo-express restart
     - cmd[nosqldb]: jcm recoverBrokenSecondary
       user: root
@@ -32,8 +32,17 @@ onAfterScaleOut[nosqldb]:
   - setAdminAppPswd: ${event.response.nodes.join(id,)}
   - cmd [${event.response.nodes.join(id,)}]: jcm restartAdminApp
 
-onAfterResetServicePassword[nosqldb]:
-  - cmd[nosqldb]: jcm restartAdminApp
+onBeforeResetServicePassword[nosqldb]:
+  - resetMongoPasswd
+  - stopEvent:
+      type: success
+      message: MongoDB cluster password changed successfully. Credentilas are sent in the e-mail.
+
+onBeforeResetNodePassword[nosqldb]:
+  - resetMongoPasswd
+  - stopEvent:
+      type: success
+      message: MongoDB cluster password changed successfully. Credentilas are sent in the e-mail.
 
 onBeforeScaleIn[nosqldb]: 
   stepDown: ${event.response.nodes.join(id,)}
@@ -56,8 +65,7 @@ actions:
   configure:
     - env.control.AddContainerEnvVars[nosqldb]:
         vars: {"KEY_PASS":"${fn.password}"}
-    - cmd[nosqldb]: jem passwd set -p ${globals.pswd}
-      user: root
+    - resetMongoPasswd
     
   uploadKey:
     - cmd[${nodes.nosqldb.master.id}]: jcm getKey
@@ -73,7 +81,7 @@ actions:
   init: 
     - sleep: 3000
     - cmd[${nodes.nosqldb.master.id}]: jcm initCluster ${nodes.nosqldb.join(id,)}
-    - cmd[nosqldb]: jcm setAdminAppPswd ${globals.pswd}
+    - setAdminAppPswd: ${nodes.nosqldb.join(id,)}
     - cmd[nosqldb]: jcm restartAdminApp || true
 
   add:
@@ -93,15 +101,20 @@ actions:
   reconfigure: 
     cmd[nosqldb]: jcm afterClone ${nodes.nosqldb.join(id,)}
   
-  resetPassword:
-    - setGlobals: 
-        pswd: ${fn.password(10)}
-    - cmd[nosqldb]: jem passwd set -p ${globals.pswd}
+  resetMongoPasswd:
+    - script: |-
+        var resp = api.env.control.ExecCmdById('${env.name}', session, '${nodes.nosqldb.master.id}', toJSON([{ "command": "printf '%s' $(echo $RANDOM | md5sum) | cut -c 1-10", "params":""}]), true);
+        var passwd = resp.responses[0].out;
+        var resp = api.env.control.ExecCmdByGroup('${env.name}', session, 'nosqldb', toJSON([{ "command": "jem passwd set -p ", "params": passwd}]), false, false, "root");
+        var title = "MongoDB cluster (Replica Set) password was successfully set for ${env.name}"
+            text = "<p>MongoDB cluster (Replica Set) password was successfully set for your ${env.name} environment.</p><p><strong>Admin panel</strong>:&nbsp;${nodes.nosqldb.master.adminUrl}</p><p><strong>User </strong>admin</p><p><strong>Password</strong>:&nbsp;" + passwd + "</p>"
+        return api.message.email.Send(appid, signature, null, '${user.email}', '${user.email}', title, text);
+    - setAdminAppPswd: ${nodes.nosqldb.join(id,)}
+    - cmd[nosqldb]: jcm restartAdminApp
   
 success: |   
   **Admin Panel**: [${nodes.nosqldb.master.url}](${nodes.nosqldb.master.url})  
-  **User**: admin  
-  **Password**: ${globals.pswd}
+  Credentilas are sent in the e-mail.
 
   * [Connection to MongoDB](http://docs.jelastic.com/connection-to-mongodb)
   * [MongoDB Replication Overview](https://docs.mongodb.com/manual/replication/)
