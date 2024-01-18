@@ -104,15 +104,8 @@ actions:
   resetMongoPasswd:
     - script: |-
         var resp = api.env.control.ExecCmdById('${env.name}', session, '${nodes.nosqldb.master.id}', toJSON([{ "command": "printf '%s' $(echo $RANDOM | md5sum) | cut -c 1-10", "params":""}]), true);
-        if (resp.result != 0) return resp;
         var passwd = resp.responses[0].out;
-        var openssl_parameters = "-aes-256-cbc -pbkdf2 -md sha512 -iter 10000 -salt -S 429488b2f3870b4a -iv dcb9fe5ecb4011cd20114119930aadc3";
-        var encCmdCommand = "echo " + passwd + " | openssl enc -e -a " + openssl_parameters + ' -pass "pass:TFVhBKDOSBspeSXesw8fElCcOzbJzYed"';
-        resp = api.env.control.ExecCmdById('${env.name}', session, '${nodes.nosqldb.master.id}', toJSON([{ "command": encCmdCommand, "params":""}]), true);
-        if (resp.result != 0) return resp;
-        var encPasswd = resp.responses[0].out;
-        resp = api.env.control.ExecCmdByGroup('${env.name}', session, 'nosqldb', toJSON([{ "command": "jem passwd set -p static::" + encPasswd, "params": ""}]), false, false, "root");
-        if (resp.result != 0) return resp;
+        var resp = api.env.control.ExecCmdByGroup('${env.name}', session, 'nosqldb', toJSON([{ "command": "jem passwd set -p ", "params": passwd}]), false, false, "root");
         var title = "MongoDB cluster (Replica Set) password was successfully set for ${env.name}"
             text = "<p>MongoDB cluster (Replica Set) password was successfully set for your ${env.name} environment.</p><p><strong>Admin panel</strong>:&nbsp;${nodes.nosqldb.master.adminUrl}</p><p><strong>User </strong>admin</p><p><strong>Password</strong>:&nbsp;" + passwd + "</p>"
         return api.message.email.Send(appid, signature, null, '${user.email}', '${user.email}', title, text);
