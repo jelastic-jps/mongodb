@@ -25,7 +25,8 @@ onAfterRedeployContainer[nosqldb]:
 
 onAfterScaleOut[nosqldb]: 
   - uploadKey: ${event.response.nodes.join(id,)}
-  - add: ${event.response.nodes.join(id,)}
+  - forEach(event.response.nodes):
+    - add: ${@i.id}
   - setAdminAppPswd: ${event.response.nodes.join(id,)}
   - cmd [${event.response.nodes.join(id,)}]: jcm restartAdminApp
 
@@ -42,10 +43,12 @@ onBeforeResetNodePassword[nosqldb]:
       message: MongoDB cluster password changed successfully. Credentilas are sent in the e-mail.
 
 onBeforeScaleIn[nosqldb]: 
-  stepDown: ${event.response.nodes.join(id,)}
+  - forEach(event.response.nodes):
+    - stepDown: ${@i.id}
 
 onAfterScaleIn[nosqldb]: 
-  remove: ${event.response.nodes.join(id,)}
+  - forEach(event.response.nodes):
+    - remove: ${@i.id}
 
 onAfterMigrate:
   - reconfigure
@@ -130,5 +133,7 @@ success: |
   **Admin Panel**: [${nodes.nosqldb.master.url}](${nodes.nosqldb.master.url})
   Credentilas are sent in the e-mail.
 
+  * [Connection to MongoDB](http://docs.jelastic.com/connection-to-mongodb)
+  * [MongoDB Replication Overview](https://docs.mongodb.com/manual/replication/)
   * [Connection to MongoDB](http://docs.jelastic.com/connection-to-mongodb)
   * [MongoDB Replication Overview](https://docs.mongodb.com/manual/replication/)
