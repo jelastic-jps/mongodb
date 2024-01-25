@@ -44,7 +44,8 @@ onBeforeResetNodePassword[nosqldb]:
 
 onBeforeScaleIn[nosqldb]: 
   - forEach(event.response.nodes):
-    - cmd${@i.id}: jem service stop
+    - cmd${@i.id}: |-
+        jem service stop
       user: root
     - stepDown: ${@i.id}
 
