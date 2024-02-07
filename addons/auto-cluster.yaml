@@ -100,12 +100,21 @@ actions:
     cmd[nosqldb]: jcm afterClone ${nodes.nosqldb.join(id,)}
   
   resetMongoPasswd:
+    - if (/^[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}/.test("${nodes.nosqldb[0].extips}")): 
+      - setGlobals:
+          protoName: "http"
+    - else:
+      - setGlobals:
+          protoName: "https"
     - script: |-
-        var resp = api.env.control.ExecCmdById('${env.name}', session, '${nodes.nosqldb.master.id}', toJSON([{ "command": "printf '%s' $(echo $RANDOM | md5sum) | cut -c 1-10", "params":""}]), true);
+        var resp = jelastic.env.control.GetEnvInfo('${env.name}', session);
+        if (resp.result != 0) return resp;
+        var currentEnvDomain = resp.env.domain;
+        resp = api.env.control.ExecCmdById('${env.name}', session, '${nodes.nosqldb.master.id}', toJSON([{ "command": "printf '%s' $(echo $RANDOM | md5sum) | cut -c 1-10", "params":""}]), true);
         if (resp.result != 0) return resp;
         var passwd = resp.responses[0].out;
         var opensslVersionCommand = "openssl version | awk '{print $2}' | awk -F . '{print $1}'";
-        var resp = api.env.control.ExecCmdById('${env.name}', session, '${nodes.nosqldb.master.id}', toJSON([{ "command": opensslVersionCommand, "params":""}]), true);
+        resp = api.env.control.ExecCmdById('${env.name}', session, '${nodes.nosqldb.master.id}', toJSON([{ "command": opensslVersionCommand, "params":""}]), true);
         if (resp.result != 0) return resp;
         var opensslVersion = resp.responses[0].out;
         if  ( opensslVersion >= 3 ) {
@@ -122,16 +131,16 @@ actions:
         resp = api.env.control.ExecCmdByGroup('${env.name}', session, 'nosqldb', toJSON([{ "command": "jem passwd set -p " + static + ":" + encPasswd, "params": ""}]), false, false, "root");
         if (resp.result != 0) return resp;
         var title = "MongoDB cluster (Replica Set) password was successfully set for ${env.name}"
-            text = "<p>MongoDB cluster (Replica Set) password was successfully set for your ${env.name} environment.</p><p><strong>Admin panel</strong>:&nbsp;${nodes.nosqldb.master.adminUrl}</p><p><strong>User </strong>admin</p><p><strong>Password</strong>:&nbsp;" + passwd + "</p>"
+            text = "<p>MongoDB cluster (Replica Set) password was successfully set for your ${env.name} environment.</p><p><strong>Admin panel</strong>:&nbsp;${globals.protoName}://" + currentEnvDomain + "/</p><p><strong>User </strong>admin</p><p><strong>Password</strong>:&nbsp;" + passwd + "</p>"
         return api.message.email.Send(appid, signature, null, '${user.email}', '${user.email}', title, text);
     - setAdminAppPswd: ${nodes.nosqldb.join(id,)}
     - cmd[nosqldb]: jcm restartAdminApp
   
-success: |
-  **Admin Panel**: [${nodes.nosqldb.master.url}](${nodes.nosqldb.master.url})
-  Credentilas are sent in the e-mail.
-
-  * [Connection to MongoDB](http://docs.jelastic.com/connection-to-mongodb)
-  * [MongoDB Replication Overview](https://docs.mongodb.com/manual/replication/)
-  * [Connection to MongoDB](http://docs.jelastic.com/connection-to-mongodb)
-  * [MongoDB Replication Overview](https://docs.mongodb.com/manual/replication/)
+success:
+  email: false
+  text: |
+    **Admin Panel**: [${nodes.nosqldb.master.url}](${nodes.nosqldb.master.url})
+    Credentilas are sent in the e-mail.
+  
+    * [Connection to MongoDB](https://docs.jelastic.com/connection-to-mongodb)
+    * [MongoDB Replication Overview](https://docs.mongodb.com/manual/replication/)
