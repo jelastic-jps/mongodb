@@ -131,7 +131,7 @@ actions:
         resp = api.env.control.ExecCmdByGroup('${env.name}', session, 'nosqldb', toJSON([{ "command": "jem passwd set -p " + static + ":" + encPasswd, "params": ""}]), false, false, "root");
         if (resp.result != 0) return resp;
         var title = "MongoDB cluster (Replica Set) password was successfully set for ${env.name}"
-            text = "<p>MongoDB cluster (Replica Set) password was successfully set for your ${env.name} environment.</p><p><strong>Admin panel</strong>:&nbsp;${globals.protoName}://" + currentEnvDomain + "/</p><p><strong>User </strong>admin</p><p><strong>Password</strong>:&nbsp;" + passwd + "</p>"
+            text = "<p>MongoDB cluster (Replica Set) password was successfully set for your ${env.name} environment.</p><p><strong>Admin panel</strong>:&nbsp;${globals.protoName}://" + "node${nodes.nosqldb.master.id}" + currentEnvDomain + "/</p><p><strong>User </strong>admin</p><p><strong>Password</strong>:&nbsp;" + passwd + "</p>"
         return api.message.email.Send(appid, signature, null, '${user.email}', '${user.email}', title, text);
     - setAdminAppPswd: ${nodes.nosqldb.join(id,)}
     - cmd[nosqldb]: jcm restartAdminApp
