@@ -1,4 +1,3 @@
----
 type: update
 id: mongodb-replica-set-auto-cluster
 name: MongoDB Replica Set
@@ -17,7 +16,7 @@ onInstall:
       user: root
   - else:
     - configure
-    - uploadKey: nosqldb
+    - uploadKey: ${settings.nodeGroup}
     - init
     
 onAfterRedeployContainer[nosqldb]:
@@ -128,7 +127,7 @@ actions:
         resp = api.env.control.ExecCmdById('${env.name}', session, '${nodes.nosqldb.master.id}', toJSON([{ "command": encCmdCommand, "params":""}]), true);
         if (resp.result != 0) return resp;
         var encPasswd = resp.responses[0].out;
-        resp = api.env.control.ExecCmdByGroup('${env.name}', session, 'nosqldb', toJSON([{ "command": "jem passwd set -p " + static + ":" + encPasswd, "params": ""}]), false, false, "root");
+        resp = api.env.control.ExecCmdByGroup('${env.name}', session, '${settings.nodeGroup}', toJSON([{ "command": "jem passwd set -p " + static + ":" + encPasswd, "params": ""}]), false, false, "root");
         if (resp.result != 0) return resp;
         var title = "MongoDB cluster (Replica Set) password was successfully set for ${env.name}"
             text = "<p>MongoDB cluster (Replica Set) password was successfully set for your ${env.name} environment.</p><p><strong>Admin panel</strong>:&nbsp;${globals.protoName}://" + "node${nodes.nosqldb.master.id}-" + currentEnvDomain + "/</p><p><strong>User </strong>admin</p><p><strong>Password</strong>:&nbsp;" + passwd + "</p>"
