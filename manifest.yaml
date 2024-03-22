@@ -1,4 +1,3 @@
----
 type: install
 id: mongodb-replica-set
 name: MongoDB Replica Set
@@ -28,19 +27,19 @@ onBeforeInit: |
   }
   return { result: 0, settings: settings };
 
-globals:
-  password: ${fn.password}
+onBeforeInstall: |
+  var resp = api.environment.control.GetTemplates(appid, session), mongoTemplate = "mongodb-dockerized";
+  if (resp.result !== 0) return resp;
 
-nodes:
-  - nodeType: mongodb
-    count: 3
-    cloudlets: 16    
-    nodeGroup: nosqldb
-    scalingMode: STATELESS
-    skipNodeEmails: true
-    password: ${globals.password}
-    cluster:
-      password: ${globals.password}
+  for (var i = 0; i < resp.array.length; i++) {
+      if (resp.array[i].nodeType == "mongo") {
+          mongoTemplate = "mongo";
+          break;
+      }
+  }
+  return {result: 0, "nodes":[{"nodeType":mongoTemplate,"count":3,"cloudlets":16,"nodeGroup":"nosqldb","scalingMode":"STATELESS","skipNodeEmails":true,"cluster": true}]};
+
+nodes: definedInOnBeforeInstall
 
 success: 
   email: false
