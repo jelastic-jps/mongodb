@@ -1,0 +1,10 @@
+type: update
+id: mongodb-trial-limitations
+name: MongoDB Trial Image Limitations
+
+targetNodes: none
+nodeGroupAlias:
+  ${settings.nodeGroup}: nosqldb
+    
+onBeforeSetCloudletCount[cp]:
+  - if (${event.params.flexibleCloudlets} > 8): stopEvent
