@@ -5,6 +5,14 @@ name: MongoDB Trial Image Limitations
 targetNodes: none
 nodeGroupAlias:
   ${settings.nodeGroup}: nosqldb
+
+onInstall:
+  - script: |-
+      resp = jelastic.env.control.SetCloudletsCountByGroup({ envName: '${env.name}', session: session, nodeGroup: 'nosqldb', fixedCloudlets: 8, flexibleCloudlets: 8});
+      if (resp.result != 0) return resp;
     
-onBeforeSetCloudletCount[cp]:
-  - if (${event.params.flexibleCloudlets} > 8): stopEvent
+onBeforeSetCloudletCount[nosqldb]:
+  - if (${event.params.flexibleCloudlets} > 8):
+    - stopEvent:
+        type: warning
+        message: Forbidden. 
