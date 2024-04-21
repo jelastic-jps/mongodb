@@ -1,0 +1,21 @@
+type: install 
+jpsVersion: 6.1.1
+name: Mongo Sandbox Image
+targetEditions: any
+id: wp-restore
+logo: /images/mongodb-70x70.png 
+description: |
+  Mongo Sandbox image
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/mongodb/master
+
+settings:
+  onBeforeInit: addons/sandboxOnBeforeInit.js
+  
+onBeforeInstall: |
+  var clusterEnabled = false;
+  if ("${settings.clustered}" == "true") {
+    clusterEnabled = true;
+  }
+  return {result:0, "nodes":[{"count":"${settings.storageNodesCount:1}","nodeGroup":"nosqldb","nodeType":"mongosandbox", "cloudlets": "${settings.cloudlets:8}","cluster": clusterEnabled}]};
+
+nodes: definedInOnBeforeInstall
