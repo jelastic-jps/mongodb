@@ -38,7 +38,7 @@ if ( max < 3 ) {
     nodesMarkupHidden = false;
 }
   
-jps.settings.fields.push({"type":"radio-fieldset","name":"customName","hidden":false,"default":"1","values":{"1":"Standalone","2":"Replica Set"},"showIf":{"2":[{"type":"spinner","name":"storageNodesCount","caption":"Number of nodes","min":3,"max":max,"increment":2},{"type":"displayfield","cls":"warning","height":30,"hideLabel":true,"markup":nodesMarkup,"hidden":nodesMarkupHidden},{"type":"string","name":"clustered","value":true,"inputType":"hidden"}]}});
+jps.settings.fields.push({"type":"radio-fieldset","name":"customName","hidden":false,"default":"1","values":{"1":"Standalone","2":"Replica Set"},"showIf":{"2":[{"type":"spinner","name":"storageNodesCount","caption":"Number of nodes","min":3,"max":max,"increment":1},{"type":"displayfield","cls":"warning","height":30,"hideLabel":true,"markup":nodesMarkup,"hidden":nodesMarkupHidden},{"type":"string","name":"clustered","value":true,"inputType":"hidden"}]}});
 
 return {
   result: 0,
