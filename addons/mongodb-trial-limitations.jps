@@ -1,18 +1,19 @@
 type: update
-id: mongodb-trial-limitations
 name: MongoDB Trial Image Limitations
+
+permanent: true
 
 targetNodes: none
 nodeGroupAlias:
   ${settings.nodeGroup}: nosqldb
 
 onInstall:
-  - script: |-
-      resp = jelastic.env.control.SetCloudletsCountByGroup({ envName: '${env.name}', session: session, nodeGroup: 'nosqldb', fixedCloudlets: 8, flexibleCloudlets: 8});
-      if (resp.result != 0) return resp;
-    
-onBeforeSetCloudletCount[nosqldb]:
-  - if (${event.params.flexibleCloudlets} > 8):
-    - stopEvent:
-        type: warning
-        message: Forbidden. 
+  env.control.SetCloudletsCountByGroup [nosqldb]:
+    fixedCloudlets: 8
+    flexibleCloudlets: 8
+
+onBeforeSetCloudletCount [nosqldb]:
+  if (${event.params.flexibleCloudlets:8} > 8):
+    stopEvent:
+      type: warning
+      message: Forbidden.

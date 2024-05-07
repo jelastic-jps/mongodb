@@ -2,7 +2,7 @@ type: install
 jpsVersion: 6.1.1
 name: Mongo Sandbox Image
 targetEditions: any
-id: wp-restore
+id: mongo-sandbox
 logo: /images/mongodb-70x70.png 
 description: |
   Mongo Sandbox image
@@ -10,7 +10,7 @@ baseUrl: https://raw.githubusercontent.com/jelastic-jps/mongodb/master
 
 settings:
   onBeforeInit: addons/sandboxOnBeforeInit.js
-  
+
 onBeforeInstall: |
   var clusterEnabled = false;
   if ("${settings.clustered}" == "true") {
