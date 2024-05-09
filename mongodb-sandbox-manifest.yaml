@@ -1,6 +1,9 @@
 type: install 
 jpsVersion: 6.1.1
 name: Mongo Sandbox Image
+categories: 
+  - apps/clusters
+homepage: http://www.mongodb.org/
 targetEditions: any
 id: mongo-sandbox
 logo: /images/mongodb-70x70.png 
