@@ -9,7 +9,7 @@ nodeGroupAlias:
 
 onInstall:
   env.control.SetCloudletsCountByGroup [nosqldb]:
-    fixedCloudlets: 8
+    fixedCloudlets: 4
     flexibleCloudlets: 8
 
 onBeforeSetCloudletCount [nosqldb]:
