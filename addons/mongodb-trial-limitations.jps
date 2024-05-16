@@ -1,5 +1,6 @@
 type: update
 name: MongoDB Trial Image Limitations
+baseUrl: https://raw.githubusercontent.com/dimkadt/mongodb/master
 
 permanent: true
 
@@ -17,3 +18,7 @@ onBeforeSetCloudletCount [nosqldb]:
     stopEvent:
       type: warning
       message: Forbidden.
+onCustomNodeEvent [name:mongosandbox]:
+  install:
+    - jps: ${baseUrl}/addons/stop.yaml?_r=${fn.random}
+      writeOutputTasks: false
