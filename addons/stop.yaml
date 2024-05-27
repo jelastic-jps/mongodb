@@ -7,4 +7,4 @@ onInstall: env.control.StopEnv
 onBeforeStart:
   stopEvent:
     type: warning
-    message: Forbidden
+    message: Your MongoDB trial has ended. You can use the production version of MongoDB directly from the topology wizard.
