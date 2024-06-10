@@ -1,0 +1,14 @@
+type: update
+name: MongoDB Image Limitations
+
+permanent: true
+
+targetNodes: none
+nodeGroupAlias:
+  ${settings.nodeGroup}: nosqldb
+  
+onInstall:
+  - if ('${user.groupType:trial}' == 'trial'):
+    return:
+      type: warning
+      message: MongoDB is not available for trial account. Please upgrade your account.
