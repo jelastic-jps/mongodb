@@ -22,3 +22,8 @@ onCustomNodeEvent [name:mongosandbox]:
   install:
     - jps: ${baseUrl}/addons/stop.yaml?_r=${fn.random}
       writeOutputTasks: false
+
+onBeforeClone:
+  stopEvent:
+    type: warning
+    message: Cloning is not supported.
