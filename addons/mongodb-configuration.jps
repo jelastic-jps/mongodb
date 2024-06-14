@@ -1,5 +1,5 @@
 type: update
-name: MongoDB Image Limitations
+name: MongoDB Image Configuration
 
 permanent: true
 
