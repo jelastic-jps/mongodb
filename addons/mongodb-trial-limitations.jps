@@ -1,6 +1,6 @@
 type: update
 name: MongoDB Trial Image Limitations
-baseUrl: https://raw.githubusercontent.com/dimkadt/mongodb/master
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/mongodb/master
 
 permanent: true
 

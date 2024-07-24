@@ -9,7 +9,7 @@ id: mongo-sandbox
 logo: /images/mongodb-70x70.png 
 description: |
   Mongo Sandbox image
-baseUrl: https://raw.githubusercontent.com/dimkadt/mongodb/master
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/mongodb/master
 
 settings:
   onBeforeInit: addons/sandboxOnBeforeInit.js
