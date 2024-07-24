@@ -1,7 +1,7 @@
 {
     "jps": "https://raw.githubusercontent.com/jelastic-jps/mongodb/master/addons/auto-cluster.yaml",
     "defaultState": false,
-    "skipOnEnvInstall": true,
+    "skipOnEnvInstall": false,
     "nodeGroupData": {
         "scalingMode": "STATELESS",
         "skipNodeEmails": true,

@@ -1,0 +1,10 @@
+type: update
+name: Stop And Prevent Start
+permanent: true
+
+onInstall: env.control.StopEnv
+
+onBeforeStart:
+  stopEvent:
+    type: warning
+    message: Your MongoDB trial has ended. You can use the production version of MongoDB directly from the topology wizard.
