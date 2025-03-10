@@ -4,7 +4,7 @@ name: MongoDB Replica Set
 categories: 
   - apps/clusters
 homepage: http://www.mongodb.org/
-baseUrl: https://raw.githubusercontent.com/dimkadt/mongodb/master
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/mongodb/master
 logo: /images/mongodb-70x70.png
 description: |  
   Three member replica sets provide enough redundancy to survive most network partitions and other system failures. 
