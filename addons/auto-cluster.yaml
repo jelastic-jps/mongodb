@@ -3,7 +3,8 @@ id: mongodb-replica-set-auto-cluster
 name: MongoDB Replica Set
 description: Auto-Clustering for MongoDB Replica Set 
 
-targetNodes: none
+targetNodes:
+  nodeGroup: ${settings.nodeGroup:nosqldb}
 nodeGroupAlias:
   ${settings.nodeGroup}: nosqldb
  
