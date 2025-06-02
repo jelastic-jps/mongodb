@@ -19,9 +19,9 @@ Normally the read operations are handled by primary server as well, but if neces
 
 ### Deployment
 
-In order to get this solution instantly deployed, click the "Deploy" button bellow, specify your email address within the widget, choose one of the [Jelastic Public Cloud providers](https://jelastic.cloud) and press Install.
+In order to get this solution instantly deployed, click the "Deploy" button bellow, specify your email address within the widget, choose one of the [Virtuozzo Public Cloud Providers](https://www.virtuozzo.com/application-platform-partners/) and press Install.
 
-[![Deploy to Jelastic PaaS](images/deploy-to-jelastic.png)](https://jelastic.com/install-application/?manifest=https%3A%2F%2Fgithub.com%2Fjelastic-jps%2Fmongodb%2Fraw%2Fmaster%2Fmanifest.yaml)
+[![deploy button](https://raw.githubusercontent.com/jelastic-jps/common/main/images/deploy-to-cloud.png)](https://www.virtuozzo.com/install/?manifest=https%3A%2F%2Fgithub.com%2Fjelastic-jps%2Fmongodb%2Fraw%2Fmaster%2Fmanifest.yaml)
 
 To deploy this package to Jelastic Private Cloud, import [this JPS manifest](manifest.yaml) within your dashboard ([detailed instruction](https://docs.jelastic.com/environment-import)).
 
