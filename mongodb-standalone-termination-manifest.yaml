@@ -1,0 +1,30 @@
+type: update
+id: mongodb-standalone-termination
+
+permanent: true
+
+targetNodes:
+  nodeGroup: ${settings.nodeGroup:nosqldb}
+nodeGroupAlias:
+  ${settings.nodeGroup}: nosqldb
+ 
+onBeforeRedeployContainer[nosqldb]:
+  - stopEvent:
+      type: warning
+      message: Container redeploy is not supported for MongoDB.
+
+onBeforeScaleOut[nosqldb]: 
+  - stopEvent:
+      type: warning
+      message: Scaling out is not supported for MongoDB.
+
+onBeforeMigrate:
+  - stopEvent:
+      type: warning
+      message: Migration is not supported for MongoDB Replica Set.
+  
+onBeforeClone:
+  - stopEvent:
+      type: warning
+      message: Cloning is not supported for MongoDB Replica Set.
+
