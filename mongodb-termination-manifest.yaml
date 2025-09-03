@@ -10,15 +10,21 @@ targetNodes:
 nodeGroupAlias:
   ${settings.nodeGroup}: nosqldb
  
-onAfterRedeployContainer[nosqldb]:
-  - cmd[nosqldb]: jcm restartAdminApp
+onBeforeRedeployContainer[nosqldb]:
+  - stopEvent:
+      type: warning
+      message: Container redeploy is not supported for MongoDB Replica Set.
 
-onAfterScaleOut[nosqldb]: 
-  - uploadKey: ${event.response.nodes.join(id,)}
+onBeforeScaleOut[nosqldb]: 
+  - stopEvent:
+      type: warning
+      message: Scaling out is not supported for MongoDB Replica Set.
+      
+onBeforeScaleIn[nosqldb]: 
   - forEach(event.response.nodes):
-    - add: ${@i.id}
-  - setAdminAppPswd: ${event.response.nodes.join(id,)}
-  - cmd [${event.response.nodes.join(id,)}]: jcm restartAdminApp
+    - stepDown: ${@i.id}
+    - cmd[${@i.id}]: sleep 10; jem service stop;
+    - remove: ${@i.id}
 
 onBeforeResetServicePassword[nosqldb]:
   - resetMongoPasswd
@@ -32,22 +38,15 @@ onBeforeResetNodePassword[nosqldb]:
       type: success
       message: MongoDB cluster password changed successfully. Credentilas are sent in the e-mail.
 
-onBeforeScaleIn[nosqldb]: 
-  - forEach(event.response.nodes):
-    - stepDown: ${@i.id}
-    - cmd[${@i.id}]: sleep 10; jem service stop;
-    - remove: ${@i.id}
-
-onAfterMigrate:
-  - reconfigure
+onBeforeMigrate:
+  - stopEvent:
+      type: warning
+      message: Migration is not supported for MongoDB Replica Set.
   
-onAfterClone:
-  - script: delete MANIFEST.id; return {result:0, jps:MANIFEST};
-  - install: ${response.jps}
-    envName: ${event.response.env.envName}    
-    settings: 
-      nodeGroup: ${settings.nodeGroup}      
-      clone: true 
+onBeforeClone:
+  - stopEvent:
+      type: warning
+      message: Cloning is not supported for MongoDB Replica Set.
 
 actions:
   configure:
