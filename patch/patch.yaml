@@ -2,7 +2,7 @@ type: update
 id: mongodb-termination
 name: MongoDB termination
 
-baseUrl: https://raw.githubusercontent.com/sych74/mongodb/refs/heads/master/patch
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/mongodb/refs/heads/master/patch
 
 targetNodes:
   nodeGroup: nosqldb
