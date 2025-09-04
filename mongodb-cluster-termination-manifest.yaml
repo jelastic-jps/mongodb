@@ -15,7 +15,7 @@ onBeforeRedeployContainer[nosqldb]:
       type: warning
       message: Container redeploy is not supported for MongoDB Replica Set.
 
-onBeforeScaleOut[nosqldb]: 
+onBeforeAddNode[nosqldb]: 
   - stopEvent:
       type: warning
       message: Scaling out is not supported for MongoDB Replica Set.
