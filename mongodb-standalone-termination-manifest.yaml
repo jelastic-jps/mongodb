@@ -5,7 +5,9 @@ name: Mongo Standalone
 permanent: true
 
 targetNodes:
-  nodeGroup: nosqldb
+  nodeGroup: ${settings.nodeGroup:nosqldb}
+nodeGroupAlias:
+  ${settings.nodeGroup}: nosqldb
  
 onBeforeRedeployContainer[nosqldb]:
   - stopEvent:
