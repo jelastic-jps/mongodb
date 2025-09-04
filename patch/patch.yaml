@@ -1,0 +1,37 @@
+type: update
+id: mongodb-termination
+name: MongoDB termination
+
+baseUrl: https://raw.githubusercontent.com/sych74/mongodb/refs/heads/master/patch
+
+targetNodes:
+  nodeGroup: nosqldb
+
+onInstall:
+  - script: |
+      var nodeGroups, resp, isCluster = false, actions = [];
+      resp = api.env.control.GetNodeGroups("${env.name}", session);
+      if (resp.result != 0) return resp;
+      nodeGroups = resp.object;
+      for (var i = 0, n = nodeGroups.length; i < n; i++) {
+        if (nodeGroups[i].name == 'nosqldb' && nodeGroups[i].cluster && nodeGroups[i].cluster.enabled)
+            isCluster = true;
+      }    
+      if (isCluster) {
+        actions.push({
+          jps: "mongodb-cluster-termination-manifest.yaml?_r=${fn.random}",
+          nodeGroup: "nosqldb",
+          settings: {
+            "nodeGroup": "nosqldb"
+          }
+        });
+      } else {
+        actions.push({
+          jps: "mongodb-standalone-termination-manifest.yaml?_r=${fn.random}",
+          nodeGroup: "nosqldb",
+          settings: {
+            "nodeGroup": "nosqldb"
+          }
+        });
+      }
+      return { result: 0, onAfterReturn: { install: actions } };
