@@ -1,12 +1,11 @@
 type: update
 id: mongodb-standalone-termination
+name: Mongo Standalone
 
 permanent: true
 
 targetNodes:
-  nodeGroup: ${settings.nodeGroup:nosqldb}
-nodeGroupAlias:
-  ${settings.nodeGroup}: nosqldb
+  nodeGroup: nosqldb
  
 onBeforeRedeployContainer[nosqldb]:
   - stopEvent:
@@ -27,4 +26,3 @@ onBeforeClone:
   - stopEvent:
       type: warning
       message: Cloning is not supported for MongoDB Replica Set.
-
