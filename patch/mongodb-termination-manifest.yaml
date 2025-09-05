@@ -1,13 +1,12 @@
 type: update
-id: mongodb-standalone-termination
-name: Mongo Standalone
+id: mongodb-replica-set-auto-cluster
+name: MongoDB Termination
+description: MongoDB Termination
 
 permanent: true
 
 targetNodes:
-  nodeGroup: ${settings.nodeGroup:nosqldb}
-nodeGroupAlias:
-  ${settings.nodeGroup}: nosqldb
+  nodeGroup: nosqldb
  
 onBeforeRedeployContainer[nosqldb]:
   - stopEvent:
@@ -18,6 +17,16 @@ onBeforeAddNode[nosqldb]:
   - stopEvent:
       type: warning
       message: Scaling out is not supported for MongoDB.
+
+onBeforeResetServicePassword[nosqldb]:
+  - stopEvent:
+      type: warning
+      message: Password reseting is not supported for MongoDB.
+
+onBeforeResetNodePassword[nosqldb]:
+  - stopEvent:
+      type: warning
+      message: Password reseting is not supported for MongoDB.
 
 onBeforeMigrate:
   - stopEvent:
